@@ -1,30 +1,34 @@
 #include "font.h"
 
-static std::vector<font_t> g_font_list{};
+static std::vector<font_t> g_fonts = {
+	{ Tahoma12px,     12, "Tahoma",           FW_MEDIUM,   ANTIALIASED_QUALITY },
+	{ Verdana12px,    12, "Verdana",          FW_SEMIBOLD, ANTIALIASED_QUALITY },
+	{ SmallFonts10px, 10, "Smallest Pixel-7", FW_THIN,     ANTIALIASED_QUALITY },
+	{ Astriumwep12px, 12, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
+	{ Astriumwep16px, 16, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
+	{ Astriumwep25px, 25, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
+};
 
-void c_fonts::init(IDirect3DDevice9* device, const std::vector<font_t> list)
+void c_fonts::init(IDirect3DDevice9* device)
 {
-	if (g_font_list.empty())
-		g_font_list = list;
-
-	for (const auto& font : g_font_list)
+	for (const auto& font : g_fonts)
 	{
 		D3DXCreateFontA(
 			device,
-			font.m_px, 0,
-			font.m_weight, 1, 0,
+			font.px, 0,
+			font.weight, 1, 0,
 			DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS,
-			font.m_quality,
+			font.quality,
 			FF_DONTCARE,
-			font.m_name.c_str(),
-			&m_fonts[font.m_index]);
+			font.name.c_str(),
+			&m_fonts[font.index]);
 	}
 }
 
 void c_fonts::restore(IDirect3DDevice9* device)
 {
-	init(device, {});
+	init(device);
 }
 
 void c_fonts::draw_string(const std::string& string, float x, float y, ID3DXFont* font, uint8_t flags, c_color color)
@@ -95,11 +99,11 @@ float c_fonts::get_text_heightW(const std::wstring& string, ID3DXFont* font)
 
 void c_fonts::undo()
 {
-	for (const auto& font : g_font_list)
+	for (const auto& font : g_fonts)
 	{
-		if (m_fonts[font.m_index]) {
-			m_fonts[font.m_index]->Release();
-			m_fonts[font.m_index] = nullptr;
+		if (m_fonts[font.index]) {
+			m_fonts[font.index]->Release();
+			m_fonts[font.index] = nullptr;
 		}
 	}
 }

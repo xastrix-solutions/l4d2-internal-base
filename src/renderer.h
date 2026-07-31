@@ -11,20 +11,11 @@
 
 class c_sprite_mgr {
 public:
-	~c_sprite_mgr() {
-		if (m_texture) {
-			m_texture->Release();
-			m_texture = nullptr;
-		}
-
-		if (m_sprite) {
-			m_sprite->Release();
-			m_sprite = nullptr;
-		}
-	}
+	c_sprite_mgr() = default;
+	~c_sprite_mgr() { undo(); }
 
 	void init(IDirect3DDevice9* device, const byte* img, const size_t img_size, int width, int height) {
-		HRESULT hr = E_FAIL;
+		undo();
 
 		m_width = width;
 		m_height = height;
@@ -33,7 +24,7 @@ public:
 		m_image_size = img_size;
 
 		D3DXCreateSprite(m_device, &m_sprite);
-		hr = D3DXCreateTextureFromFileInMemoryEx(m_device, m_image, m_image_size, m_width, m_height,
+		HRESULT hr = D3DXCreateTextureFromFileInMemoryEx(m_device, m_image, m_image_size, m_width, m_height,
 			D3DX_DEFAULT, 0, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, 0, 0, &m_texture);
 
 		if (FAILED(hr)) {
@@ -47,7 +38,7 @@ public:
 	}
 
 	void init(IDirect3DDevice9* device, const std::string& path, int width, int height) {
-		HRESULT hr = E_FAIL;
+		undo();
 
 		m_width = width;
 		m_height = height;
@@ -55,7 +46,7 @@ public:
 		m_path = path;
 
 		D3DXCreateSprite(m_device, &m_sprite);
-		hr = D3DXCreateTextureFromFileExA(m_device, m_path.c_str(), m_width, m_height,
+		HRESULT hr = D3DXCreateTextureFromFileExA(m_device, m_path.c_str(), m_width, m_height,
 			D3DX_DEFAULT, 0, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, 0, 0, &m_texture);
 
 		if (FAILED(hr)) {
@@ -83,10 +74,8 @@ public:
 	}
 
 	void on_reset() {
-		if (!m_device || !m_sprite || !m_texture)
-			return;
-
-		m_sprite->OnLostDevice();
+		if (m_sprite)
+			m_sprite->OnLostDevice();
 
 		if (m_texture) {
 			m_texture->Release();
@@ -95,13 +84,20 @@ public:
 	}
 
 	void on_reset_end() {
-		HRESULT hr = E_FAIL;
-
-		if (!m_device || !m_sprite)
+		if (!m_device)
 			return;
 
-		m_sprite->OnResetDevice();
+		if (m_sprite) {
+			m_sprite->OnResetDevice();
+		}
+
+		if (m_texture) {
+			m_texture->Release();
+			m_texture = nullptr;
+		}
 		
+		HRESULT hr = E_FAIL;
+
 		if (m_path.empty() && (m_image && m_image_size > 0))
 			hr = D3DXCreateTextureFromFileInMemoryEx(m_device, m_image, m_image_size, m_width, m_height,
 				D3DX_DEFAULT, 0, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, 0, 0, &m_texture);
@@ -128,6 +124,18 @@ public:
 
 		m_sprite->SetTransform(&matrix);
 		m_sprite->Draw(m_texture, 0, 0, 0, color.get());
+	}
+
+	void undo() {
+		if (m_texture) {
+			m_texture->Release();
+			m_texture = nullptr;
+		}
+
+		if (m_sprite) {
+			m_sprite->Release();
+			m_sprite = nullptr;
+		}
 	}
 
 	int get_width() {

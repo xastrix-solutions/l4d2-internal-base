@@ -24,15 +24,7 @@ static void __stdcall init(HMODULE I)
 		g_sig->init();
 		g_cs->init();
 
-		g_font->init(g_cs->m_device, {
-			{ Tahoma12px,     12, "Tahoma",           FW_MEDIUM,   ANTIALIASED_QUALITY },
-			{ Verdana12px,    12, "Verdana",          FW_SEMIBOLD, ANTIALIASED_QUALITY },
-			{ SmallFonts10px, 10, "Smallest Pixel-7", FW_THIN,     ANTIALIASED_QUALITY },
-			{ Astriumwep12px, 12, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
-			{ Astriumwep16px, 16, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
-			{ Astriumwep25px, 25, "AstriumWep",       FW_NORMAL,   CLEARTYPE_QUALITY },
-		});
-
+		g_font->init(g_cs->m_device);
 		if (g_renderer->init(g_cs->m_device))
 			g_ui->init(g_cs->m_device);
 

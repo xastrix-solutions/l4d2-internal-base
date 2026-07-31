@@ -302,7 +302,7 @@ void c_renderer::build_lookup_table()
 
 void c_renderer::begin()
 {
-	m_device->CreateStateBlock(D3DSBT_PIXELSTATE, &m_state_block);
+	m_device->CreateStateBlock(D3DSBT_ALL, &m_state_block);
 
 	m_state_block->Capture();
 
@@ -345,17 +345,43 @@ void c_renderer::begin()
 
 void c_renderer::end()
 {
-	m_state_block->Apply();
-	m_state_block->Release();
+	if (!m_device) return;
 
-	m_device->SetVertexDeclaration(m_vert_dec);
-	m_device->SetVertexShader(m_vert_shader);
+	if (m_vert_dec) {
+		m_device->SetVertexDeclaration(m_vert_dec);
+		m_vert_dec->Release();
+		m_vert_dec = nullptr;
+	}
+
+	if (m_vert_shader) {
+		m_device->SetVertexShader(m_vert_shader);
+		m_vert_shader->Release();
+		m_vert_shader = nullptr;
+	}
+
+	if (m_state_block) {
+		m_state_block->Apply();
+		m_state_block->Release();
+		m_state_block = nullptr;
+	}
 }
 
 void c_renderer::undo()
 {
-	if (m_device) {
-		m_device->Release();
-		m_device = nullptr;
+	if (m_state_block) {
+		m_state_block->Release();
+		m_state_block = nullptr;
 	}
+
+	if (m_vert_dec) {
+		m_vert_dec->Release();
+		m_vert_dec = nullptr;
+	}
+
+	if (m_vert_shader) {
+		m_vert_shader->Release();
+		m_vert_shader = nullptr;
+	}
+
+	m_device = nullptr;
 }

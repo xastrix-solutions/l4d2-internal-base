@@ -19,16 +19,16 @@ enum _draw_string_flags {
 };
 
 struct font_t {
-	_font_list  m_index{};
-	int         m_px{};
-	std::string m_name{};
-	uint32_t    m_weight{};
-	DWORD       m_quality{};
+	_font_list  index;
+	int         px;
+	std::string name;
+	uint32_t    weight;
+	DWORD       quality;
 };
 
 class c_fonts {
 public:
-	void init(IDirect3DDevice9* device, const std::vector<font_t> list);
+	void init(IDirect3DDevice9* device);
 	void restore(IDirect3DDevice9* device);
 
 	void draw_string(const std::string& string, float x, float y, ID3DXFont* font, uint8_t flags, c_color color);
